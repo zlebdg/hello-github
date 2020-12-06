@@ -1,0 +1,30 @@
+name: Update xuqplus' github pages
+
+on:
+  push:
+    branches: [ master ]
+  workflow_dispatch:
+
+jobs:
+  build-deploy: 
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@master
+    - name: Build
+      run: |
+        yarn && yarn build
+    - name: Deploy
+      env:
+        GIT_USER: xuqplus
+        GIT_EMAIL: xuqunqun@live.cn
+        GIT_REPO: xuqplus.github.io
+        GIT_TOKEN: ${{ secrets.ACCESS_TOKEN}}
+        FOLDER: dist
+      run: |
+        git config --global user.email $GIT_EMAIL
+        git config --global user.name $GIT_USER
+        mkdir $GITHUB_SHA && cd $GITHUB_SHA
+        git clone https://$GIT_USER:$GIT_TOKEN@github.com/$GIT_USER/$GIT_REPO.git && cd $GIT_REPO
+        cp -rf ../../$FOLDER/* . && git add . && git commit -m "From $GITHUB_REPOSITORY ${GITHUB_SHA:0:12} automated update."
+        git push
